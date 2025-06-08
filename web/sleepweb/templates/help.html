@@ -1,0 +1,49 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}帮助中心 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">帮助中心</h2>
+    </div>
+    <div class="card-content">
+        <h3>常见问题</h3>
+
+        {% for faq in faqs %}
+        <div class="card" style="margin-bottom: 1rem;">
+            <div class="card-header" style="background: #f8f9fa; cursor: pointer;" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+                <h4 style="margin: 0;"><i class="fas fa-question-circle"></i> {{ faq.question }}</h4>
+            </div>
+            <div class="card-content" style="display: none;">
+                <p>{{ faq.answer }}</p>
+            </div>
+        </div>
+        {% endfor %}
+
+        <h3>联系我们</h3>
+        <div class="card">
+            <div class="card-content">
+                <p>如果您有更多问题或需要技术支持，请联系我们：</p>
+                <p><i class="fas fa-envelope"></i> 邮箱: support@sleepmgr.com</p>
+                <p><i class="fas fa-phone"></i> 电话: 400-123-4567</p>
+                <p><i class="fas fa-clock"></i> 工作时间: 周一至周五 9:00-18:00</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 简单的FAQ展开/收起功能
+        document.querySelectorAll('.card-header').forEach(header => {
+            header.addEventListener('click', function() {
+                const content = this.nextElementSibling;
+                content.style.display = content.style.display === 'none' ? 'block' : 'none';
+            });
+        });
+    });
+</script>
+{% endblock %}

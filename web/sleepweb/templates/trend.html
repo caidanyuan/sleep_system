@@ -1,0 +1,73 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}趋势预测 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">睡眠质量趋势预测</h2>
+    </div>
+    <div class="card-content">
+        <p>基于您过去的睡眠数据和当前习惯，系统预测了未来7天的睡眠质量趋势。</p>
+
+        <div class="chart-container">
+            睡眠质量预测图表
+        </div>
+
+        <h3>未来7天预测</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>预测睡眠质量</th>
+                    <th>建议</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, quality in predicted_data %}
+                <tr>
+                    <td>{{ date }}</td>
+                    <td>{{ quality|floatformat:1 }}/5.0</td>
+                    <td>
+                        {% if quality < 3.0 %}
+                        预计睡眠质量较低，建议调整作息
+                        {% elif quality < 4.0 %}
+                        睡眠质量一般，有提升空间
+                        {% else %}
+                        预计睡眠质量良好
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>提升睡眠质量的建议</h3>
+        <div class="recommendation">
+            <i class="fas fa-lightbulb"></i> 保持规律的睡眠时间表，每天在同一时间上床睡觉和起床
+        </div>
+        <div class="recommendation">
+            <i class="fas fa-lightbulb"></i> 睡前避免摄入咖啡因和大量食物
+        </div>
+        <div class="recommendation">
+            <i class="fas fa-lightbulb"></i> 创造舒适的睡眠环境：黑暗、安静、凉爽
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 这里可以添加图表初始化代码
+    document.addEventListener('DOMContentLoaded', function() {
+        const predictedData = [
+            {% for date, quality in predicted_data %}
+            { date: "{{ date }}", quality: {{ quality }} },
+            {% endfor %}
+        ];
+
+        console.log('预测数据:', predictedData);
+        // 实际项目中应使用Chart.js等库绘制图表
+    });
+</script>
+{% endblock %}

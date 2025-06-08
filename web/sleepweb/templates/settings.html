@@ -1,0 +1,68 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}系统设置 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">个人设置</h2>
+    </div>
+    <div class="card-content">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" class="form-control" value="{{ user.username }}" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>电子邮件</label>
+                <input type="email" class="form-control" value="{{ user.email }}">
+            </div>
+
+            <h3>睡眠目标设置</h3>
+
+            <div class="form-group">
+                <label>目标入睡时间</label>
+                {{ form.target_bedtime }}
+            </div>
+
+            <div class="form-group">
+                <label>目标起床时间</label>
+                {{ form.target_wakeup_time }}
+            </div>
+
+            <div class="form-group">
+                <label>目标睡眠时长 (小时)</label>
+                {{ form.target_sleep_duration }}
+            </div>
+
+            <h3>通知设置</h3>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" checked> 睡前提醒
+                </label>
+                <p class="text-muted">在设定的睡觉时间前30分钟提醒</p>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" checked> 每周睡眠报告
+                </label>
+                <p class="text-muted">每周一发送上周睡眠报告到邮箱</p>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <input type="checkbox"> 睡眠质量异常提醒
+                </label>
+                <p class="text-muted">当睡眠质量连续3天低于设定阈值时提醒</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary">保存设置</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

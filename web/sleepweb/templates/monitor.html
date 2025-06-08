@@ -1,0 +1,52 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}监控数据 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">睡眠数据监控</h2>
+        <a href="{% url 'sleepapp:add_sleep_record' %}" class="btn btn-primary">添加记录</a>
+    </div>
+    <div class="card-content">
+        <div class="chart-container">
+            睡眠数据趋势图
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>入睡时间</th>
+                    <th>起床时间</th>
+                    <th>睡眠时长</th>
+                    <th>睡眠质量</th>
+                    <th>深度睡眠</th>
+                    <th>REM睡眠</th>
+                    <th>醒来次数</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.bedtime }}</td>
+                    <td>{{ record.wakeup_time }}</td>
+                    <td>{{ record.sleep_duration }}小时</td>
+                    <td>{{ record.get_sleep_quality_display }}</td>
+                    <td>{{ record.deep_sleep_percentage }}%</td>
+                    <td>{{ record.rem_sleep_percentage }}%</td>
+                    <td>{{ record.awakenings }}</td>
+                    <td>{{ record.notes|default:"" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" style="text-align: center;">暂无睡眠记录</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}社区交流 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">睡眠社区</h2>
+        <a href="#" class="btn btn-primary">发表帖子</a>
+    </div>
+    <div class="card-content">
+        <div class="form-group">
+            <input type="text" class="form-control" placeholder="搜索帖子...">
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <div class="post-avatar">JD</div>
+                <div>
+                    <div class="post-author">John Doe</div>
+                    <div class="post-date">2023-06-01</div>
+                </div>
+            </div>
+            <h3 class="post-title">如何改善深度睡眠质量？</h3>
+            <p class="post-content">最近我的深度睡眠比例一直很低，只有15%左右，感觉第二天总是很疲惫。大家有什么好的建议吗？</p>
+            <div class="post-footer">
+                <div>12 评论</div>
+                <div class="post-actions">
+                    <a href="#"><i class="far fa-thumbs-up"></i> 24</a>
+                    <a href="#"><i class="far fa-comment"></i> 评论</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <div class="post-avatar">JS</div>
+                <div>
+                    <div class="post-author">Jane Smith</div>
+                    <div class="post-date">2023-05-28</div>
+                </div>
+            </div>
+            <h3 class="post-title">分享我的睡眠改善经验</h3>
+            <p class="post-content">经过三个月的努力，我的睡眠质量从2.5提高到了4.2！主要方法是坚持睡前冥想和调整卧室温度...</p>
+            <div class="post-footer">
+                <div>32 评论</div>
+                <div class="post-actions">
+                    <a href="#"><i class="far fa-thumbs-up"></i> 56</a>
+                    <a href="#"><i class="far fa-comment"></i> 评论</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="post-header">
+                <div class="post-avatar">MB</div>
+                <div>
+                    <div class="post-author">Mike Brown</div>
+                    <div class="post-date">2023-05-25</div>
+                </div>
+            </div>
+            <h3 class="post-title">褪黑素使用体验分享</h3>
+            <p class="post-content">因为长期失眠，医生建议我尝试褪黑素。使用一个月后，入睡时间缩短了，但白天有时会感到困倦...</p>
+            <div class="post-footer">
+                <div>18 评论</div>
+                <div class="post-actions">
+                    <a href="#"><i class="far fa-thumbs-up"></i> 31</a>
+                    <a href="#"><i class="far fa-comment"></i> 评论</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

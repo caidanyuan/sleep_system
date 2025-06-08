@@ -1,0 +1,78 @@
+{% extends "sleepapp/base.html" %}
+
+{% block title %}睡眠分析 - 睡眠质量管理系统{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">睡眠质量分析</h2>
+        <a href="{% url 'sleepapp:add_sleep_record' %}" class="btn btn-primary">添加记录</a>
+    </div>
+    <div class="card-content">
+        <div class="dashboard">
+            <div class="card">
+                <h3>本周睡眠质量概览</h3>
+                <div class="chart-container">
+                    睡眠质量图表
+                </div>
+                <p>本周平均睡眠质量: {{ avg_quality }}/5.0</p>
+            </div>
+            
+            <div class="card">
+                <h3>睡眠阶段分布</h3>
+                <div class="chart-container">
+                    睡眠阶段饼图
+                </div>
+                <p>深度睡眠平均: 25% | REM睡眠平均: 20%</p>
+            </div>
+        </div>
+        
+        <h3>睡眠改善建议</h3>
+        {% for recommendation in recommendations %}
+            <div class="recommendation">
+                <i class="fas fa-lightbulb"></i> {{ recommendation }}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">最近7天睡眠记录</h2>
+    </div>
+    <div class="card-content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>日期</th>
+                    <th>入睡时间</th>
+                    <th>起床时间</th>
+                    <th>睡眠时长</th>
+                    <th>睡眠质量</th>
+                    <th>深度睡眠</th>
+                    <th>REM睡眠</th>
+                    <th>醒来次数</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.bedtime }}</td>
+                    <td>{{ record.wakeup_time }}</td>
+                    <td>{{ record.sleep_duration }}小时</td>
+                    <td>{{ record.get_sleep_quality_display }}</td>
+                    <td>{{ record.deep_sleep_percentage }}%</td>
+                    <td>{{ record.rem_sleep_percentage }}%</td>
+                    <td>{{ record.awakenings }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center;">暂无睡眠记录</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

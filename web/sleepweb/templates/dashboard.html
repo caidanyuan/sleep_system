@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}睡眠分析{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">睡眠分析</h1>
+    <div class="d-flex">
+        <button class="btn btn-sm btn-outline-primary me-2">
+            <i class="bi bi-download"></i> 导出报告
+        </button>
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addRecordModal">
+            <i class="bi bi-plus-lg"></i> 添加记录
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="value">7.2<span class="fs-6">h</span></div>
+            <div class="label">平均睡眠时长</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="value">82<span class="fs-6">分</span></div>
+            <div class="label">睡眠质量评分</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="value">1.8<span class="fs-6">次</span></div>
+            <div class="label">平均夜间醒来</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="value">2.5<span class="fs-6">h</span></div>
+            <div class="label">平均深度睡眠</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>最近7天睡眠趋势</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-secondary">周</button>
+                    <button class="btn btn-sm btn-outline-secondary">月</button>
+                    <button class="btn btn-sm btn-outline-secondary active">年</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="sleep-chart-container">
+                    <canvas id="sleepTrendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">睡眠质量评估</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="position-relative" style="width: 150px; height: 150px;">
+                        <canvas id="qualityGauge"></canvas>
+                        <div class="position-absolute top-50 start-50 translate-middle text-center">
+                            <div class="h3 mb-0">82</div>
+                            <small class="text-muted">得分</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mb-3">
+                    <span class="quality-badge quality-excellent">优秀</span>
+                </div>
+                <p class="text-center text-muted">您的睡眠质量优于85%的用户</p>
+                
+                <div class="mt-4">
+                    <h6 class="mb-3">改善建议：</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            保持规律的睡眠时间
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            睡前避免使用电子设备
+                        </li>
+                        <li class="list-group-item d-flex align-items-center">
+                            <i class="bi bi-exclamation-circle-fill text-warning me-2"></i>
+                            减少咖啡因摄入（特别是下午）
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">睡眠阶段分布</div>
+            <div class="card-body">
+                <div class="sleep-chart-container">
+                    <canvas id="sleepStageChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">今日目标完成情况</div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>睡眠时长</div>
+                    <div><strong>7.2h</strong> / 8.0h</div>
+                </div>
+                <div class="progress mb-4" style="height: 12px;">
+                    <div class="progress-bar" role="progressbar" style="width: 90%"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <div>就寝时间</div>
+                    <div><strong>23:15</strong> / 22:30</div>
+                </div>
+                <div class="progress mb-4" style="height: 12px;">
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: 65%"></div>
+                </div>
+                
+                <div class="d-flex justify-content-between mb-3">
+                    <div>起床时间</div>
+                    <div><strong>6:45</strong> / 6:30</div>
+                </div>
+                <div class="progress" style="height: 12px;">
+                    <div class="progress-bar bg-info" role="progressbar" style="width: 80%"></div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <button class="btn btn-sm btn-outline-primary">调整目标</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 添加记录模态框 -->
+<div class="modal fade" id="addRecordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">添加睡眠记录</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ sleep_form|crispy }}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">保存记录</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // 睡眠趋势图
+    const trendCtx = document.getElementById('sleepTrendChart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+            datasets: [{
+                label: '睡眠时长 (小时)',
+                data: [6.8, 7.2, 7.5, 6.5, 7.0, 8.2, 7.8],
+                borderColor: '#4361ee',
+                backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                tension: 0.3,
+                fill: true
+            }, {
+                label: '质量评分',
+                data: [78, 82, 85, 75, 80, 88, 86],
+                borderColor: '#4cc9f0',
+                borderDash: [5, 5],
+                pointRadius: 5,
+                pointBackgroundColor: '#4cc9f0'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 60,
+                    ticks: {
+                        callback: function(value) {
+                            return value + (this.scale.id === 'y' ? 'h' : '分');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 睡眠阶段分布图
+    const stageCtx = document.getElementById('sleepStageChart').getContext('2d');
+    const stageChart = new Chart(stageCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['深度睡眠', 'REM睡眠', '浅度睡眠'],
+            datasets: [{
+                data: [2.5, 1.8, 2.9],
+                backgroundColor: ['#4361ee', '#4cc9f0', '#f72585'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // 睡眠质量仪表盘
+    const gaugeCtx = document.getElementById('qualityGauge').getContext('2d');
+    const gaugeChart = new Chart(gaugeCtx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [82, 18],
+                backgroundColor: ['#4361ee', '#e9ecef'],
+                circumference: 180,
+                rotation: 270,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '80%',
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    enabled: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
