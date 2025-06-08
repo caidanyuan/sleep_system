@@ -1,0 +1,2421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能睡眠健康管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #f72585;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --page-bg: #f0f2f5;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            color: var(--dark);
+            line-height: 1.6;
+            transition: background-color 0.3s ease;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem 1rem;
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 3px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        /* 主内容区域样式 */
+        .main-content {
+            grid-column: 2;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--light-gray);
+            border-radius: 30px;
+            padding: 0.5rem 1rem;
+            width: 300px;
+        }
+
+        .search-bar input {
+            border: none;
+            background: transparent;
+            padding: 0.5rem;
+            width: 100%;
+            outline: none;
+        }
+
+        /* 数据概览卡片 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-title {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* 图表区域 */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        /* 睡眠建议卡片 */
+        .recommendation-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .recommendation-item {
+            display: flex;
+            padding: 1rem;
+            border-radius: 8px;
+            background: var(--light);
+            transition: transform 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .rec-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(67, 97, 238, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* 社区讨论区 */
+        .community-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .community-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .post-form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.5rem;
+        }
+
+        .post-form textarea {
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .post-form button {
+            align-self: flex-end;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .post-form button:hover {
+            background: var(--secondary);
+        }
+
+        .posts-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .post {
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .post-content {
+            margin-bottom: 1rem;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .post-action {
+            display: flex;
+            align-items: center;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .post-action:hover {
+            color: var(--primary);
+        }
+
+        .post-action i {
+            margin-right: 5px;
+        }
+
+        .post-replies {
+            margin-top: 1rem;
+            margin-left: 2rem;
+            border-left: 2px solid var(--light-gray);
+            padding-left: 1rem;
+        }
+
+        .reply {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .reply:last-child {
+            border-bottom: none;
+        }
+
+        .reply-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .reply-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 0.8rem;
+        }
+
+        .reply-form {
+            display: flex;
+            margin-top: 1rem;
+        }
+
+        .reply-form input {
+            flex: 1;
+            border: 1px solid var(--light-gray);
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+        }
+
+        .reply-form button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+        }
+
+        /* 页面内容 */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        /* 登录/注册页面 */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 400px;
+            padding: 2.5rem;
+        }
+
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .auth-tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            position: relative;
+        }
+
+        .auth-tab.active {
+            color: var(--primary);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .auth-btn:hover {
+            background: var(--secondary);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--gray);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        /* 设置页面 */
+        .settings-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .settings-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        /* 帮助中心 */
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 1rem;
+            background: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            padding: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            padding: 0 1.2rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.2rem 1.2rem;
+            max-height: 1000px;
+        }
+
+        /* 睡眠分析页面 */
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .analysis-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .sleep-score {
+            font-size: 3rem;
+            font-weight: 700;
+            text-align: center;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        .score-description {
+            text-align: center;
+            color: var(--gray);
+        }
+
+        /* 移动端菜单按钮 */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 101;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 250px;
+                transform: translateX(-100%);
+                z-index: 100;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                grid-column: 1;
+                padding: 1.5rem;
+                width: 100%;
+            }
+
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .analysis-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .settings-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-bar {
+                width: 100%;
+                margin-top: 1rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 暗色模式 */
+        body.dark-mode {
+            --page-bg: #121212;
+            --card-bg: #1e1e1e;
+            --dark: #f0f0f0;
+            --light-gray: #2d2d2d;
+            --gray: #a0a0a0;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录/注册页面 -->
+    <div id="auth-page" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-tab="login">登录</div>
+                <div class="auth-tab" data-tab="register">注册</div>
+            </div>
+
+            <div id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-email">邮箱</label>
+                    <input type="email" id="login-email" placeholder="请输入邮箱">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" placeholder="请输入密码">
+                </div>
+                <button id="login-btn" class="auth-btn">登录</button>
+                <div class="auth-footer">
+                    <a href="#" id="forgot-password">忘记密码?</a>
+                </div>
+            </div>
+
+            <div id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="register-name">姓名</label>
+                    <input type="text" id="register-name" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">邮箱</label>
+                    <input type="email" id="register-email" placeholder="请输入邮箱">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">密码</label>
+                    <input type="password" id="register-password" placeholder="至少8位字符">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">确认密码</label>
+                    <input type="password" id="register-confirm" placeholder="再次输入密码">
+                </div>
+                <button id="register-btn" class="auth-btn">注册</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主应用页面 (默认隐藏) -->
+    <div id="app" style="display: none;">
+        <button class="mobile-menu-btn" id="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <div class="container">
+            <!-- 侧边导航栏 -->
+            <aside class="sidebar" id="sidebar">
+                <div class="logo">
+                    <i class="fas fa-moon"></i>
+                    <h1>睡眠健康系统</h1>
+                </div>
+
+                <div class="nav-item active" data-page="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>仪表盘</span>
+                </div>
+                <div class="nav-item" data-page="sleep-analysis">
+                    <i class="fas fa-bed"></i>
+                    <span>睡眠分析</span>
+                </div>
+                <div class="nav-item" data-page="monitoring">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>监控数据</span>
+                </div>
+                <div class="nav-item" data-page="trend-prediction">
+                    <i class="fas fa-chart-line"></i>
+                    <span>趋势预测</span>
+                </div>
+                <div class="nav-item" data-page="community">
+                    <i class="fas fa-comments"></i>
+                    <span>社区交流</span>
+                </div>
+                <div class="nav-item" data-page="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>系统设置</span>
+                </div>
+                <div class="nav-item" data-page="help">
+                    <i class="fas fa-question-circle"></i>
+                    <span>帮助中心</span>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                    <div class="nav-item" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>退出登录</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 主内容区域 -->
+            <main class="main-content">
+                <!-- 顶部标题栏 -->
+                <div class="header">
+                    <div class="user-info">
+                        <div class="user-avatar" id="user-avatar">张</div>
+                        <div>
+                            <h3 id="username">张明, 欢迎回来</h3>
+                            <p id="sleep-status">睡眠质量: 良好</p>
+                        </div>
+                    </div>
+
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="搜索睡眠数据或建议...">
+                    </div>
+                </div>
+
+                <!-- 仪表盘页面 -->
+                <div id="dashboard" class="page-content active">
+                    <!-- 数据概览卡片 -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>睡眠时长</h3>
+                                <div class="stat-icon" style="background: rgba(76, 201, 240, 0.1); color: #4cc9f0;">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value">7.2 小时</div>
+                            <div class="stat-title">较昨日 +0.3小时</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>睡眠质量</h3>
+                                <div class="stat-icon" style="background: rgba(67, 97, 238, 0.1); color: #4361ee;">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value">86%</div>
+                            <div class="stat-title">高于平均水平</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>深睡比例</h3>
+                                <div class="stat-icon" style="background: rgba(63, 55, 201, 0.1); color: #3f37c9;">
+                                    <i class="fas fa-moon"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value">32%</div>
+                            <div class="stat-title">目标35%</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>本周连续达标</h3>
+                                <div class="stat-icon" style="background: rgba(72, 149, 239, 0.1); color: #4895ef;">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value">5 天</div>
+                            <div class="stat-title">目标7天</div>
+                        </div>
+                    </div>
+
+                    <!-- 图表区域 -->
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">睡眠质量趋势分析</h2>
+                                <div>
+                                    <select id="trend-select" style="padding: 0.5rem; border-radius: 8px; border: 1px solid #ddd;">
+                                        <option>最近7天</option>
+                                        <option>最近30天</option>
+                                        <option>最近90天</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sleepTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">睡眠阶段分布</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sleepStageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 健康建议区域 -->
+                    <div class="recommendation-card">
+                        <div class="card-header">
+                            <h2 class="card-title">个性化健康建议</h2>
+                            <button id="refresh-advice" style="background: transparent; color: var(--primary); border: none; cursor: pointer;">
+                                <i class="fas fa-sync-alt"></i> 刷新建议
+                            </button>
+                        </div>
+
+                        <div class="recommendations" id="recommendations-container">
+                            <!-- 建议内容由JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 睡眠分析页面 -->
+                <div id="sleep-analysis" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">睡眠质量分析</h2>
+
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <h3 style="text-align: center;">睡眠评分</h3>
+                            <div class="sleep-score">86</div>
+                            <p class="score-description">良好 - 优于76%的用户</p>
+                            <div class="chart-container" style="height: 250px; margin-top: 1rem;">
+                                <canvas id="sleepQualityChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h3>睡眠阶段分析</h3>
+                            <div class="chart-container" style="height: 300px;">
+                                <canvas id="detailedStageChart"></canvas>
+                            </div>
+                            <div style="display: flex; justify-content: space-around; margin-top: 1rem;">
+                                <span style="text-align: center;">
+                                    <div style="width: 30px; height: 30px; background-color: #3f37c9; border-radius: 50%; display: inline-block;"></div>
+                                    <p style="margin-top: 5px; font-size: 0.8rem;">深睡 (32%)</p>
+                                </span>
+                                <span style="text-align: center;">
+                                    <div style="width: 30px; height: 30px; background-color: #4895ef; border-radius: 50%; display: inline-block;"></div>
+                                    <p style="margin-top: 5px; font-size: 0.8rem;">浅睡 (48%)</p>
+                                </span>
+                                <span style="text-align: center;">
+                                    <div style="width: 30px; height: 30px; background-color: #4cc9f0; border-radius: 50%; display: inline-block;"></div>
+                                    <p style="margin-top: 5px; font-size: 0.8rem;">REM (15%)</p>
+                                </span>
+                                <span style="text-align: center;">
+                                    <div style="width: 30px; height: 30px; background-color: #f72585; border-radius: 50%; display: inline-block;"></div>
+                                    <p style="margin-top: 5px; font-size: 0.8rem;">清醒 (5%)</p>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h3>睡眠效率</h3>
+                            <div class="stat-value" style="text-align: center; margin: 1rem 0;">92%</div>
+                            <div class="chart-container" style="height: 200px;">
+                                <canvas id="sleepEfficiencyChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="analysis-card">
+                            <h3>历史记录</h3>
+                            <div style="height: 300px; overflow-y: auto;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="border-bottom: 1px solid var(--light-gray);">
+                                            <th style="padding: 0.8rem; text-align: left;">日期</th>
+                                            <th style="padding: 0.8rem; text-align: left;">时长</th>
+                                            <th style="padding: 0.8rem; text-align: left;">质量</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sleep-history">
+                                        <!-- 历史数据由JS生成 -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 监控数据页面 -->
+                <div id="monitoring" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">实时睡眠监控</h2>
+
+                    <div class="stats-container" style="margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>心率</h3>
+                                <div class="stat-icon" style="background: rgba(247, 37, 133, 0.1); color: #f72585;">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="heart-rate">62</div>
+                            <div class="stat-title">bpm (静息)</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>呼吸频率</h3>
+                                <div class="stat-icon" style="background: rgba(76, 201, 240, 0.1); color: #4cc9f0;">
+                                    <i class="fas fa-wind"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="breath-rate">14</div>
+                            <div class="stat-title">次/分钟</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>血氧饱和度</h3>
+                                <div class="stat-icon" style="background: rgba(67, 97, 238, 0.1); color: #4361ee;">
+                                    <i class="fas fa-lungs"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="blood-oxygen">97%</div>
+                            <div class="stat-title">正常范围</div>
+                        </div>
+
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <h3>体动次数</h3>
+                                <div class="stat-icon" style="background: rgba(72, 149, 239, 0.1); color: #4895ef;">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="movement-count">8</div>
+                            <div class="stat-title">次/小时</div>
+                        </div>
+                    </div>
+
+                    <div class="charts-container">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">整夜心率变化</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="heartRateChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">睡眠深度变化</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="sleepDepthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">睡眠呼吸分析</h2>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="breathAnalysisChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 趋势预测页面 -->
+                <div id="trend-prediction" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">睡眠趋势预测</h2>
+
+                    <div class="chart-card">
+                        <div class="card-header">
+                            <h2 class="card-title">未来7天睡眠质量预测</h2>
+                            <div>
+                                <button id="predict-btn" style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    更新预测
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="predictionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="charts-container" style="margin-top: 1.5rem;">
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">睡眠时长趋势</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="durationTrendChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <div class="card-header">
+                                <h2 class="card-title">影响因素分析</h2>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="factorAnalysisChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-card" style="margin-top: 1.5rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">改善建议</h2>
+                        </div>
+                        <div class="recommendations">
+                            <div class="recommendation-item">
+                                <div class="rec-icon">
+                                    <i class="fas fa-apple-alt"></i>
+                                </div>
+                                <div>
+                                    <h3>饮食调整</h3>
+                                    <p>根据预测，您周三的睡眠质量可能下降，建议当天晚餐避免油腻食物</p>
+                                </div>
+                            </div>
+
+                            <div class="recommendation-item">
+                                <div class="rec-icon">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div>
+                                    <h3>运动计划</h3>
+                                    <p>周五增加30分钟中等强度运动，可提高当晚睡眠质量15%</p>
+                                </div>
+                            </div>
+
+                            <div class="recommendation-item">
+                                <div class="rec-icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div>
+                                    <h3>作息时间</h3>
+                                    <p>建议周末入睡时间提前30分钟，有助于保持生物钟稳定</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 社区交流页面 -->
+                <div id="community" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">社区交流</h2>
+
+                    <div class="community-card">
+                        <div class="card-header">
+                            <h2 class="card-title">发布新话题</h2>
+                        </div>
+
+                        <div class="post-form">
+                            <textarea id="post-content" placeholder="分享你的睡眠经验或提出问题..."></textarea>
+                            <button id="post-submit">发布</button>
+                        </div>
+
+                        <div class="posts-container" id="posts-container">
+                            <!-- 帖子内容由JS动态生成 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 系统设置页面 -->
+                <div id="settings" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">系统设置</h2>
+
+                    <div class="settings-container">
+                        <div class="settings-card">
+                            <h3 style="margin-bottom: 1.5rem;">账户设置</h3>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>个人信息</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">更新您的姓名、邮箱等</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    编辑
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>更改密码</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">定期更新密码确保安全</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    更改
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>通知设置</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">管理推送通知偏好</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    设置
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3 style="margin-bottom: 1.5rem;">设备与连接</h3>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>连接的设备</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">智能手表、睡眠监测器等</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    管理
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>数据同步</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">自动同步睡眠数据</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>备份与恢复</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">管理您的睡眠数据备份</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    设置
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3 style="margin-bottom: 1.5rem;">个性化设置</h3>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>主题模式</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">切换亮色/暗色模式</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="dark-mode-toggle">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>睡眠目标</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">设置每日睡眠时长目标</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    设置
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>提醒设置</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">就寝提醒、起床提醒等</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    设置
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-card">
+                            <h3 style="margin-bottom: 1.5rem;">隐私与安全</h3>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>数据隐私</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">管理数据分享权限</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;">
+                                    设置
+                                </button>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>两步验证</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">增强账户安全性</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="settings-item">
+                                <div>
+                                    <h4>注销账户</h4>
+                                    <p style="color: var(--gray); font-size: 0.9rem;">永久删除账户及数据</p>
+                                </div>
+                                <button style="background: var(--light); border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; color: var(--warning);">
+                                    注销
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 帮助中心页面 -->
+                <div id="help" class="page-content">
+                    <h2 style="margin-bottom: 1.5rem;">帮助中心</h2>
+
+                    <div class="faq-container">
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>如何连接我的睡眠监测设备？</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>您可以在"系统设置"中的"设备与连接"部分添加新设备。确保您的设备蓝牙已打开，然后点击"扫描设备"，选择您的设备并按照提示完成配对。</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>睡眠质量分数是如何计算的？</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>睡眠质量分数基于多个因素综合计算，包括：总睡眠时长、深睡比例、REM睡眠比例、夜间醒来次数、睡眠效率（床上时间中实际睡眠的比例）以及睡眠规律性。算法会为每个因素分配权重，最终生成0-100分的评分。</p>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>如何提高我的深睡时间？</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>提高深睡时间的方法包括：</p>
+                                <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                    <li>保持规律的睡眠时间表，即使在周末</li>
+                                    <li>睡前避免蓝光暴露（手机、电脑等）</li>
+                                    <li>保持卧室凉爽（18-20℃最佳）</li>
+                                    <li>减少晚间咖啡因和酒精摄入</li>
+                                    <li>白天进行适度运动，但避免睡前3小时剧烈运动</li>
+                                    <li>尝试放松技巧如冥想或深呼吸</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>为什么我的睡眠数据没有同步？</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>如果您的睡眠数据没有同步，请尝试以下步骤：</p>
+                                <ol style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                                    <li>确保您的设备蓝牙已打开且与应用连接正常</li>
+                                    <li>检查设备电量是否充足</li>
+                                    <li>在"系统设置"中确认数据同步功能已开启</li>
+                                    <li>尝试手动同步：在设备页面下拉刷新</li>
+                                    <li>重启设备和手机</li>
+                                    <li>如果问题持续，请联系客服支持</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="faq-item">
+                            <div class="faq-question">
+                                <span>趋势预测的准确性如何？</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                            <div class="faq-answer">
+                                <p>我们的趋势预测基于机器学习算法，分析您历史的睡眠数据、生活习惯（通过手动输入或连接的健康应用）以及环境因素（如季节变化）。在持续使用3周以上后，预测准确率可达85%以上。预测结果会随着您提供更多数据而不断优化。</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="community-card" style="margin-top: 2rem;">
+                        <div class="card-header">
+                            <h2 class="card-title">联系客服</h2>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p>如果我们的帮助中心未能解决您的问题，请联系我们的客服团队：</p>
+                            <div style="margin-top: 1rem;">
+                                <p><i class="fas fa-envelope" style="margin-right: 10px;"></i> 邮箱：support@sleephealth.com</p>
+                                <p><i class="fas fa-phone" style="margin-right: 10px;"></i> 电话：400-123-4567</p>
+                                <p><i class="fas fa-comments" style="margin-right: 10px;"></i> 在线客服：工作日 9:00-18:00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化图表
+            initCharts();
+
+            // 初始化事件监听器
+            initEventListeners();
+
+            // 生成模拟数据
+            generateMockData();
+
+            // 检查是否已登录
+            checkLoginStatus();
+        });
+
+        // 初始化图表
+        function initCharts() {
+            // 睡眠趋势图表
+            const trendCtx = document.getElementById('sleepTrendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [
+                        {
+                            label: '睡眠时长(小时)',
+                            data: [6.8, 7.2, 6.5, 7.5, 7.0, 8.2, 7.8],
+                            borderColor: '#4361ee',
+                            backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: '睡眠质量(%)',
+                            data: [82, 86, 78, 88, 84, 90, 87],
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            title: {
+                                display: true,
+                                text: '数值'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠阶段图表
+            const stageCtx = document.getElementById('sleepStageChart').getContext('2d');
+            new Chart(stageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['深睡', '浅睡', 'REM', '清醒'],
+                    datasets: [ {
+                        data: [32, 48, 15, 5],
+                        backgroundColor: [
+                            '#3f37c9',
+                            '#4895ef',
+                            '#4cc9f0',
+                            '#f72585'
+                        ],
+                        borderWidth: 0
+                    } ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 睡眠质量分数图表
+            const qualityCtx = document.getElementById('sleepQualityChart').getContext('2d');
+            new Chart(qualityCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['深度睡眠', '睡眠效率', 'REM 睡眠', '入睡速度', '夜间清醒', '睡眠规律性'],
+                    datasets: [{
+                        label: '我的睡眠',
+                        data: [82, 86, 75, 88, 90, 85],
+                        backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                        borderColor: '#4361ee',
+                        pointBackgroundColor: '#4361ee'
+                    }, {
+                        label: '平均值',
+                        data: [70, 75, 65, 78, 80, 72],
+                        backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                        borderColor: '#4cc9f0',
+                        pointBackgroundColor: '#4cc9f0'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // 详细睡眠阶段图表
+            const detailedStageCtx = document.getElementById('detailedStageChart').getContext('2d');
+            new Chart(detailedStageCtx, {
+                type: 'line',
+                data: {
+                    labels: ['22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00'],
+                    datasets: [{
+                        label: '深睡',
+                        data: [0, 0, 30, 35, 40, 30, 25, 20, 15, 10, 5],
+                        borderColor: '#3f37c9',
+                        backgroundColor: 'rgba(63, 55, 201, 0.1)',
+                        fill: true
+                    }, {
+                        label: '浅睡',
+                        data: [10, 20, 35, 30, 25, 40, 45, 50, 55, 60, 65],
+                        borderColor: '#4895ef',
+                        backgroundColor: 'rgba(72, 149, 239, 0.1)',
+                        fill: true
+                    }, {
+                        label: 'REM',
+                        data: [0, 5, 10, 15, 20, 25, 20, 15, 10, 5, 0],
+                        borderColor: '#4cc9f0',
+                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                        fill: true
+                    }, {
+                        label: '清醒',
+                        data: [80, 75, 25, 20, 15, 5, 10, 15, 20, 25, 30],
+                        borderColor: '#f72585',
+                        backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '占比 (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠效率图表
+            const efficiencyCtx = document.getElementById('sleepEfficiencyChart').getContext('2d');
+            new Chart(efficiencyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '睡眠效率 (%)',
+                        data: [90, 92, 88, 95, 91, 93, 92],
+                        backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                        borderColor: '#4361ee',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '效率 (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 整夜心率变化图表
+            const heartRateCtx = document.getElementById('heartRateChart').getContext('2d');
+            new Chart(heartRateCtx, {
+                type: 'line',
+                data: {
+                    labels: ['22:00', '22:30', '23:00', '23:30', '00:00', '00:30', '01:00', '01:30', '02:00', '02:30', '03:00', '03:30', '04:00', '04:30', '05:00', '05:30', '06:00', '06:30', '07:00', '07:30'],
+                    datasets: [{
+                        label: '心率 (bpm)',
+                        data: [72, 70, 68, 65, 62, 60, 61, 63, 62, 60, 58, 59, 61, 62, 63, 65, 67, 69, 70, 72],
+                        borderColor: '#f72585',
+                        backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 80,
+                            title: {
+                                display: true,
+                                text: '心率 (bpm)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠深度变化图表
+            const sleepDepthCtx = document.getElementById('sleepDepthChart').getContext('2d');
+            new Chart(sleepDepthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00'],
+                    datasets: [{
+                        label: '睡眠深度',
+                        data: [1, 2, 3, 4, 3, 2, 3, 4, 3, 2],
+                        borderColor: '#4361ee',
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#4361ee'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 4,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const depthLevels = ['', '浅睡', '中度睡眠', '深睡', 'REM'];
+                                    return depthLevels[value];
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: '睡眠深度'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠呼吸分析图表
+            const breathCtx = document.getElementById('breathAnalysisChart').getContext('2d');
+            new Chart(breathCtx, {
+                type: 'line',
+                data: {
+                    labels: ['22:00', '23:00', '00:00', '01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00'],
+                    datasets: [{
+                        label: '呼吸频率 (次/分钟)',
+                        data: [14, 13, 12, 11, 12, 13, 12, 11, 12, 13],
+                        borderColor: '#4cc9f0',
+                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 8,
+                            max: 20,
+                            title: {
+                                display: true,
+                                text: '呼吸频率 (次/分钟)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠质量预测图表
+            const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+            new Chart(predictionCtx, {
+                type: 'line',
+                data: {
+                    labels: ['今天', '明天', '第3天', '第4天', '第5天', '第6天', '第7天'],
+                    datasets: [
+                        {
+                            label: '历史平均',
+                            data: [86, 86, 86, 86, 86, 86, 86],
+                            borderColor: '#4cc9f0',
+                            backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                            tension: 0.3,
+                            fill: true,
+                            borderDash: [5, 5]
+                        },
+                        {
+                            label: '预测值',
+                            data: [86, 85, 84, 83, 82, 80, 85],
+                            borderColor: '#f72585',
+                            backgroundColor: 'rgba(247, 37, 133, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 60,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: '睡眠质量 (%)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 睡眠时长趋势图表
+            const durationTrendCtx = document.getElementById('durationTrendChart').getContext('2d');
+            new Chart(durationTrendCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [
+                        {
+                            label: '实际时长 (小时)',
+                            data: [7.2, 6.8, 7.5, 7.0, 8.2, 7.8, 7.5],
+                            backgroundColor: 'rgba(67, 97, 238, 0.7)',
+                            borderColor: '#4361ee',
+                            borderWidth: 1
+                        },
+                        {
+                            label: '目标时长 (小时)',
+                            data: [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0],
+                            backgroundColor: 'rgba(247, 37, 133, 0.7)',
+                            borderColor: '#f72585',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 6,
+                            max: 9,
+                            title: {
+                                display: true,
+                                text: '时长 (小时)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 影响因素分析图表
+            const factorCtx = document.getElementById('factorAnalysisChart').getContext('2d');
+            new Chart(factorCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['运动量', '咖啡因摄入', '屏幕时间', '晚餐时间', '压力水平', '卧室温度'],
+                    datasets: [
+                        {
+                            label: '我的数据',
+                            data: [70, 45, 60, 55, 65, 40],
+                            backgroundColor: 'rgba(67, 97, 238, 0.2)',
+                            borderColor: '#4361ee',
+                            pointBackgroundColor: '#4361ee'
+                        },
+                        {
+                            label: '理想水平',
+                            data: [80, 30, 40, 65, 35, 50],
+                            backgroundColor: 'rgba(76, 201, 240, 0.2)',
+                            borderColor: '#4cc9f0',
+                            pointBackgroundColor: '#4cc9f0'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 登录/注册切换
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+
+                    this.classList.add('active');
+                    document.getElementById(`${this.dataset.tab}-form`).classList.add('active');
+                });
+            });
+
+            // 登录按钮
+            document.getElementById('login-btn').addEventListener('click', function() {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                if (email && password) {
+                    // 模拟登录成功
+                    document.getElementById('auth-page').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                    document.getElementById('username').textContent = email.split('@')[0] + ', 欢迎回来';
+
+                    // 存储登录状态
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userEmail', email);
+                } else {
+                    alert('请输入邮箱和密码');
+                }
+            });
+
+            // 注册按钮
+            document.getElementById('register-btn').addEventListener('click', function() {
+                const name = document.getElementById('register-name').value;
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                const confirm = document.getElementById('register-confirm').value;
+
+                if (!name || !email || !password || !confirm) {
+                    alert('请填写所有字段');
+                    return;
+                }
+
+                if (password !== confirm) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+
+                if (password.length < 8) {
+                    alert('密码长度至少为8位');
+                    return;
+                }
+
+                // 模拟注册成功
+                alert('注册成功！请登录');
+                document.querySelector('[data-tab="login"]').click();
+                document.getElementById('login-email').value = email;
+                document.getElementById('login-password').value = password;
+            });
+
+            // 导航菜单点击
+            document.querySelectorAll('.nav-item').forEach(item => {
+                if (item.id !== 'logout-btn') {
+                    item.addEventListener('click', function() {
+                        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                        document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+
+                        this.classList.add('active');
+                        document.getElementById(this.dataset.page).classList.add('active');
+                    });
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userEmail');
+                document.getElementById('auth-page').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+            });
+
+            // 发布帖子
+            document.getElementById('post-submit').addEventListener('click', function() {
+                const content = document.getElementById('post-content').value.trim();
+
+                if (content) {
+                    const postsContainer = document.getElementById('posts-container');
+                    const newPost = document.createElement('div');
+                    newPost.className = 'post';
+                    newPost.innerHTML = `
+                        <div class="post-header">
+                            <div class="post-avatar">${localStorage.getItem('userEmail')?.charAt(0).toUpperCase() || '用'}</div>
+                            <div>
+                                <h3>${localStorage.getItem('userEmail')?.split('@')[0] || '用户'}</h3>
+                                <small>刚刚</small>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <p>${content}</p>
+                        </div>
+                        <div class="post-actions">
+                            <div class="post-action like-action">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>0</span>
+                            </div>
+                            <div class="post-action comment-action">
+                                <i class="fas fa-comment"></i>
+                                <span>0</span>
+                            </div>
+                        </div>
+                        <div class="post-replies">
+                        </div>
+                        <div class="reply-form">
+                            <input type="text" placeholder="发表回复..." class="reply-input">
+                            <button class="reply-submit">回复</button>
+                        </div>
+                    `;
+
+                    postsContainer.insertBefore(newPost, postsContainer.firstChild);
+                    document.getElementById('post-content').value = '';
+
+                    // 为新帖子添加点赞和回复事件
+                    initPostInteractions(newPost);
+                } else {
+                    alert('请输入内容后再发布！');
+                }
+            });
+
+            // 点赞功能
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fa-thumbs-up')) {
+                    const span = e.target.nextElementSibling;
+                    let count = parseInt(span.textContent);
+                    span.textContent = count + 1;
+                    e.target.style.color = '#f72585';
+
+                    // 如果点赞数超过5，显示系统推荐回复
+                    if (count + 1 >= 5) {
+                        setTimeout(() => {
+                            const post = e.target.closest('.post');
+                            const replies = post.querySelector('.post-replies');
+                            const systemReply = document.createElement('div');
+                            systemReply.className = 'reply';
+                            systemReply.innerHTML = `
+                                <div class="reply-header">
+                                    <div class="reply-avatar">系</div>
+                                    <div>
+                                        <h4>智能助手</h4>
+                                        <small>2分钟前</small>
+                                    </div>
+                                </div>
+                                <p>感谢您的分享！根据我们的数据分析，您的经验对很多用户都有帮助。</p>
+                            `;
+                            replies.appendChild(systemReply);
+                        }, 2000);
+                    }
+                }
+            });
+
+            // 回复功能
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('fa-comment')) {
+                    const post = e.target.closest('.post');
+                    const replyForm = post.querySelector('.reply-form');
+                    const repliesContainer = post.querySelector('.post-replies');
+                    const replyInput = replyForm.querySelector('.reply-input');
+                    const replyButton = replyForm.querySelector('.reply-submit');
+
+                    // 切换回复表单可见性
+                    replyForm.style.display = replyForm.style.display === 'flex' ? 'none' : 'flex';
+
+                    // 设置回复按钮点击事件
+                    replyButton.onclick = function() {
+                        const replyText = replyInput.value.trim();
+                        if (replyText) {
+                            const newReply = document.createElement('div');
+                            newReply.className = 'reply';
+                            newReply.innerHTML = `
+                                <div class="reply-header">
+                                    <div class="reply-avatar">${localStorage.getItem('userEmail')?.charAt(0).toUpperCase() || '用'}</div>
+                                    <div>
+                                        <h4>${localStorage.getItem('userEmail')?.split('@')[0] || '用户'}</h4>
+                                        <small>刚刚</small>
+                                    </div>
+                                </div>
+                                <p>${replyText}</p>
+                                <div class="reply-actions">
+                                    <div class="post-action like-action">
+                                        <i class="fas fa-thumbs-up"></i>
+                                        <span>0</span>
+                                    </div>
+                                </div>
+                            `;
+                            repliesContainer.appendChild(newReply);
+                            replyInput.value = '';
+
+                            // 为新回复添加点赞事件
+                            initPostInteractions(newReply);
+                        }
+                    };
+                }
+            });
+
+            // 移动端菜单切换
+            document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('active');
+            });
+
+            // 暗色模式切换
+            document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+                document.body.classList.toggle('dark-mode');
+                localStorage.setItem('darkMode', this.checked ? 'enabled' : 'disabled');
+            });
+
+            // FAQ展开/收起
+            document.querySelectorAll('.faq-question').forEach(question => {
+                question.addEventListener('click', function() {
+                    this.parentElement.classList.toggle('active');
+                });
+            });
+
+            // 刷新建议按钮
+            document.getElementById('refresh-advice').addEventListener('click', function() {
+                generateRecommendations();
+            });
+
+            // 预测更新按钮
+            document.getElementById('predict-btn').addEventListener('click', function() {
+                updatePredictions();
+            });
+        }
+
+        // 为帖子和回复初始化交互功能
+        function initPostInteractions(element) {
+            // 点赞功能
+            element.querySelectorAll('.fa-thumbs-up').forEach(icon => {
+                icon.addEventListener('click', function() {
+                    const span = this.nextElementSibling;
+                    let count = parseInt(span.textContent);
+                    span.textContent = count + 1;
+                    this.style.color = '#f72585';
+                });
+            });
+        }
+
+        // 生成模拟数据
+        function generateMockData() {
+            // 生成健康建议
+            const recommendations = [
+                {
+                    icon: 'fa-temperature-low',
+                    title: '调整卧室温度',
+                    content: '当前温度22℃，建议调整至18-20℃以优化睡眠环境'
+                },
+                {
+                    icon: 'fa-coffee',
+                    title: '减少咖啡因摄入',
+                    content: '您今日咖啡因摄入量已达300mg，建议下午2点后避免饮用咖啡'
+                },
+                {
+                    icon: 'fa-walking',
+                    title: '增加日间运动',
+                    content: '本周运动时间不足150分钟，建议每天增加30分钟中等强度运动'
+                }
+            ];
+
+            const recContainer = document.getElementById('recommendations-container');
+            recContainer.innerHTML = '';
+
+            recommendations.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                item.innerHTML = `
+                    <div class="rec-icon">
+                        <i class="fas ${rec.icon}"></i>
+                    </div>
+                    <div>
+                        <h3>${rec.title}</h3>
+                        <p>${rec.content}</p>
+                    </div>
+                `;
+                recContainer.appendChild(item);
+            });
+
+            // 生成社区帖子
+            const posts = [
+                {
+                    avatar: '李',
+                    name: '李医生',
+                    role: '睡眠专家 · 2小时前',
+                    content: '深度睡眠不足的朋友可以尝试这些方法：1. 保持规律的睡眠时间 2. 睡前1小时避免使用电子设备 3. 尝试4-7-8呼吸法 4. 保持卧室完全黑暗'
+                },
+                {
+                    avatar: '王',
+                    name: '王小雨',
+                    role: '普通用户 · 5小时前',
+                    content: '大家有对付早醒的方法吗？我每天凌晨4-5点就醒了再也睡不着，即使晚上11点才睡。白天精神很差，有什么建议吗？'
+                },
+                {
+                    avatar: '赵',
+                    name: '赵健康',
+                    role: '资深用户 · 1天前',
+                    content: '分享一个对我有效的方法：使用白噪音APP。以前我很容易被环境噪音惊醒，自从使用白噪音后，睡眠连续性明显改善，深睡时间增加了20%！'
+                }
+            ];
+
+            const postsContainer = document.getElementById('posts-container');
+            postsContainer.innerHTML = '';
+
+            posts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-avatar">${post.avatar}</div>
+                        <div>
+                            <h3>${post.name}</h3>
+                            <small>${post.role}</small>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>${post.content}</p>
+                    </div>
+                    <div class="post-actions">
+                        <div class="post-action like-action">
+                            <i class="fas fa-thumbs-up"></i>
+                            <span>${Math.floor(Math.random() * 50)}</span>
+                        </div>
+                        <div class="post-action comment-action">
+                            <i class="fas fa-comment"></i>
+                            <span>${Math.floor(Math.random() * 20)}</span>
+                        </div>
+                    </div>
+                    <div class="post-replies">
+                        ${generateReplies(post.name)}
+                    </div>
+                    <div class="reply-form">
+                        <input type="text" placeholder="发表回复..." class="reply-input">
+                        <button class="reply-submit">回复</button>
+                    </div>
+                `;
+                postsContainer.appendChild(postElement);
+
+                // 为帖子初始化交互功能
+                initPostInteractions(postElement);
+            });
+
+            // 生成睡眠历史
+            const sleepHistory = document.getElementById('sleep-history');
+            const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const day = days[date.getDay()];
+                const duration = (7 + Math.random()).toFixed(1);
+                const quality = Math.floor(70 + Math.random() * 30);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="padding: 0.8rem;">${date.toLocaleDateString()} (${day})</td>
+                    <td style="padding: 0.8rem;">${duration} 小时</td>
+                    <td style="padding: 0.8rem;">${quality}%</td>
+                `;
+                sleepHistory.appendChild(row);
+            }
+        }
+
+        // 生成回复
+        function generateReplies(postAuthor) {
+            const repliesHtml = [];
+            const replyCount = Math.floor(Math.random() * 5) + 1;
+
+            for (let i = 0; i < replyCount; i++) {
+                const isSystem = i === replyCount - 1 && Math.random() > 0.7;
+                const author = isSystem ? '智能助手' : '用户' + Math.floor(Math.random() * 10);
+                const avatar = isSystem ? '系' : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+
+                repliesHtml.push(`
+                    <div class="reply">
+                        <div class="reply-header">
+                            <div class="reply-avatar">${avatar}</div>
+                            <div>
+                                <h4>${author}</h4>
+                                <small>${isSystem ? '系统回复' : '用户'} · ${Math.floor(Math.random() * 3) + 1}小时前</small>
+                            </div>
+                        </div>
+                        <p>${isSystem
+                            ? '感谢您的分享！根据我们的数据分析，您的经验对很多用户都有帮助。'
+                            : '我也遇到过类似的问题，尝试了这些方法后有所改善。坚持很重要！'}</p>
+                        <div class="reply-actions">
+                            <div class="post-action like-action">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>${Math.floor(Math.random() * 10)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            }
+
+            return repliesHtml.join('');
+        }
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+            if (isLoggedIn) {
+                document.getElementById('auth-page').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+
+                const userEmail = localStorage.getItem('userEmail');
+                if (userEmail) {
+                    document.getElementById('username').textContent = userEmail.split('@')[0] + ', 欢迎回来';
+                    document.getElementById('user-avatar').textContent = userEmail.charAt(0).toUpperCase();
+                }
+
+                // 检查暗色模式设置
+                if (localStorage.getItem('darkMode') === 'enabled') {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('dark-mode-toggle').checked = true;
+                }
+            } else {
+                document.getElementById('auth-page').style.display = 'flex';
+                document.getElementById('app').style.display = 'none';
+            }
+        }
+
+        // 生成建议
+        function generateRecommendations() {
+            const recommendations = [
+                {
+                    icon: 'fa-temperature-low',
+                    title: '调整卧室温度',
+                    content: '当前温度22℃，建议调整至18-20℃以优化睡眠环境'
+                },
+                {
+                    icon: 'fa-coffee',
+                    title: '减少咖啡因摄入',
+                    content: '您今日咖啡因摄入量已达300mg，建议下午2点后避免饮用咖啡'
+                },
+                {
+                    icon: 'fa-walking',
+                    title: '增加日间运动',
+                    content: '本周运动时间不足150分钟，建议每天增加30分钟中等强度运动'
+                },
+                {
+                    icon: 'fa-wind',
+                    title: '改善卧室通风',
+                    content: '保持卧室空气流通，有助于提高睡眠质量'
+                },
+                {
+                    icon: 'fa-bed',
+                    title: '规律作息时间',
+                    content: '建议每天23:00前入睡，保持7-8小时睡眠时间'
+                }
+            ];
+
+            const randomRecs = [];
+            const recCount = 3;
+            const recContainer = document.getElementById('recommendations-container');
+
+            // 随机选择3条建议
+            for (let i = 0; i < recCount; i++) {
+                const randomIndex = Math.floor(Math.random() * recommendations.length);
+                randomRecs.push(recommendations[randomIndex]);
+            }
+
+            recContainer.innerHTML = '';
+            randomRecs.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'recommendation-item';
+                item.innerHTML = `
+                    <div class="rec-icon">
+                        <i class="fas ${rec.icon}"></i>
+                    </div>
+                    <div>
+                        <h3>${rec.title}</h3>
+                        <p>${rec.content}</p>
+                    </div>
+                `;
+                recContainer.appendChild(item);
+            });
+        }
+
+        // 更新预测
+        function updatePredictions() {
+            const predictionCtx = document.getElementById('predictionChart').getContext('2d');
+            const predictionChart = Chart.getChart(predictionCtx);
+
+            if (predictionChart) {
+                predictionChart.data.datasets[1].data = [
+                    86,
+                    Math.floor(Math.random() * 10) + 75,
+                    Math.floor(Math.random() * 10) + 75,
+                    Math.floor(Math.random() * 10) + 75,
+                    Math.floor(Math.random() * 10) + 75,
+                    Math.floor(Math.random() * 10) + 75,
+                    Math.floor(Math.random() * 10) + 75
+                ];
+                predictionChart.update();
+            }
+        }
+    </script>
+</body>
+</html>
